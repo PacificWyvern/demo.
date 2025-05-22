@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nextgenwealth.co - Digital Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* Base styles for the body and overall layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background for the digital command center feel */
+            color: #e2e8f0; /* Light text for contrast */
+            line-height: 1.6;
+        }
+
+        /* Container for main content, centered and responsive */
+        .container {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Card styling for courses and Storm Pass options */
+        .card {
+            background-color: #2d3748; /* Slightly lighter dark for cards */
+            border-radius: 0.75rem; /* More rounded corners */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); /* Deeper shadow */
+            padding: 2rem;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 1px solid #4a5568; /* Subtle border for definition */
+        }
+        .card:hover {
+            transform: translateY(-0.5rem); /* Lift effect on hover */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+
+        /* Button styling */
+        .btn-primary {
+            background-color: #fbbf24; /* Golden color for primary actions */
+            color: #1a202c; /* Dark text for contrast on golden buttons */
+            padding: 0.85rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn-primary:hover {
+            background-color: #f59e0b; /* Darker golden on hover */
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #4a5568; /* Darker gray for secondary actions */
+            color: #e2e8f0;
+            padding: 0.85rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn-secondary:hover {
+            background-color: #6a768c;
+            transform: translateY(-2px);
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 2.75rem; /* Larger titles */
+            font-weight: 700;
+            color: #fbbf24; /* Golden color */
+            margin-bottom: 2.5rem;
+            text-align: center;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Specific styling for course cards */
+        .course-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fbbf24;
+            margin-bottom: 0.75rem;
+        }
+        .course-description {
+            font-size: 1rem;
+            color: #cbd5e0;
+            margin-bottom: 1.25rem;
+        }
+        .course-price {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+
+        /* Storm Pass specific styling */
+        .storm-pass-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .storm-pass-description {
+            font-size: 1.15rem;
+            color: #cbd5e0;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .storm-pass-option {
+            background-color: #2d3748;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            width: 100%; /* Full width on small screens */
+            max-width: 350px; /* Max width for larger screens */
+            border: 1px solid #4a5568;
+        }
+        @media (min-width: 768px) { /* Adjust for medium screens and up */
+            .storm-pass-option {
+                width: calc(50% - 1rem); /* Two columns with gap */
+            }
+        }
+        @media (min-width: 1024px) { /* Adjust for large screens and up */
+            .storm-pass-option {
+                width: calc(33.333% - 1rem); /* Three columns with gap */
+            }
+        }
+        .storm-pass-option:hover {
+            transform: translateY(-0.5rem);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+        .storm-pass-price-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 0.75rem;
+        }
+        .storm-pass-duration {
+            font-size: 1.1rem;
+            color: #a0aec0;
+            margin-bottom: 1.5rem;
+        }
+        .storm-pass-features {
+            list-style: none; /* Remove default bullets */
+            padding: 0;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            color: #cbd5e0;
+            text-align: left;
+        }
+        .storm-pass-features li {
+            position: relative;
+            padding-left: 1.75rem; /* Space for custom bullet */
+            margin-bottom: 0.75rem;
+        }
+        .storm-pass-features li::before {
+            content: '✓'; /* Custom checkmark bullet */
+            color: #10b981; /* Green checkmark */
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Gemini AI section specific styles */
+        .gemini-section {
+            background-color: #2d3748;
+            padding: 2.5rem;
+            border-radius: 0.75rem;
+            margin-top: 2.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            border: 1px solid #4a5568;
+        }
+        .gemini-input-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #cbd5e0;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        .gemini-input {
+            padding: 1rem;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+            background-color: #4a5568;
+            color: #e2e8f0;
+            width: 100%;
+        }
+        .gemini-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
+        }
+        .gemini-response-area {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            background-color: #4a5568;
+            font-size: 1rem;
+            color: #e2e8f0;
+            min-height: 120px;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            word-break: break-word; /* Break long words */
+        }
+        .gemini-response-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fbbf24;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Admin Panel specific overrides and styles */
+        #admin-panel {
+            background-color: #1c2430; /* Even darker for admin panel to distinguish */
+            border-color: #fbbf24; /* Golden border for admin panel */
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); /* Golden glow */
+        }
+        #admin-panel .text-red-400 {
+            color: #fca5a5; /* Lighter red for warnings on dark background */
+        }
+        #admin-panel .bg-gray-700 {
+            background-color: #2d3748; /* Override inner sections to card background */
+            border-color: #4a5568;
+        }
+        #admin-panel .text-amber-400 {
+            color: #fbbf24;
+        }
+        #admin-panel .btn-success {
+            background-color: #10b981; /* Green for success/add actions */
+            color: #1a202c;
+        }
+        #admin-panel .btn-success:hover {
+            background-color: #059669;
+        }
+        #admin-panel .btn-danger {
+            background-color: #ef4444; /* Red for delete actions */
+            color: white;
+        }
+        #admin-panel .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        #admin-course-list li {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #4a5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        #admin-course-list li:last-child {
+            border-bottom: none;
+        }
+        #admin-course-list li span {
+            flex-grow: 1;
+            margin-right: 1rem;
+        }
+        #admin-course-list li button {
+            margin-left: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 0.3rem;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Payment Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Darker overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+        }
+        .modal-content {
+            background-color: #1a202c;
+            padding: 2.5rem;
+            border-radius: 1rem; /* More rounded */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            width: 90%;
+            max-width: 550px;
+            text-align: center;
+            border: 2px solid #fbbf24; /* Prominent golden border */
+            animation: fadeInScale 0.3s ease-out;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-content h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 1.5rem;
+        }
+        .modal-content p {
+            color: #cbd5e0;
+            margin-bottom: 1rem;
+        }
+        #card-element {
+            border: 1px solid #4a5568;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: #4a5568;
+            margin-bottom: 1.5rem;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .modal-button {
+            padding: 0.85rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .modal-button.confirm {
+            background-color: #10b981; /* Green */
+            color: #1a202c;
+        }
+        .modal-button.confirm:hover {
+            background-color: #059669;
+        }
+        .modal-button.cancel {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        .modal-button.cancel:hover {
+            background-color: #dc2626;
+        }
+        #card-errors {
+            color: #fca5a5; /* Lighter red for errors */
+            margin-top: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        /* Download section within modal */
+        .download-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #4a5568;
+        }
+        .download-link {
+            background-color: #fbbf24;
+            color: #1a202c;
+            padding: 0.85rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .download-link:hover {
+            background-color: #f59e0b;
+        }
+
+        /* Loading indicator for AI responses */
+        .loading-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fbbf24;
+            animation: spin 1s ease-in-out infinite;
+            -webkit-animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+        @-webkit-keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+
+        /* Icon styling */
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            filter: invert(100%); /* Default to white icons on dark backgrounds */
+        }
+        .btn-primary .icon, .download-link .icon {
+            filter: invert(0%); /* Ensure icons on golden buttons are dark */
+        }
+
+        /* Responsive adjustments for header navigation */
+        @media (max-width: 767px) {
+            .header-nav {
+                display: none; /* Hide by default on mobile */
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                background-color: #1a202c;
+                position: absolute;
+                top: 64px; /* Below header */
+                left: 0;
+                padding: 1rem 0;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            }
+            .header-nav.active {
+                display: flex; /* Show when active */
+            }
+            .header-nav li {
+                margin-bottom: 0.75rem;
+            }
+            .header-nav a {
+                display: block;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+            }
+            .menu-toggle {
+                display: block; /* Show hamburger icon on mobile */
+            }
+        }
+        @media (min-width: 768px) {
+            .header-nav {
+                display: flex !important; /* Always show nav on desktop */
+            }
+            .menu-toggle {
+                display: none; /* Hide hamburger icon on desktop */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-gray-900 shadow-lg py-4 relative z-50">
+        <div class="container flex justify-between items-center">
+            <a href="#" class="text-3xl font-extrabold text-amber-400">Nextgenwealth.co</a>
+            <button class="menu-toggle text-gray-300 focus:outline-none md:hidden">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <nav class="header-nav space-x-4">
+                <ul class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6">
+                    <li><a href="#courses" class="text-gray-300 hover:text-amber-400 font-medium transition-colors p-2 rounded-md">Courses</a></li>
+                    <li><a href="#storm-pass" class="text-gray-300 hover:text-amber-400 font-medium transition-colors p-2 rounded-md">Storm Pass</a></li>
+                    <li><a href="#gemini-features" class="text-gray-300 hover:text-amber-400 font-medium transition-colors p-2 rounded-md">AI Tools</a></li>
+                    <li><a href="#blog" class="text-gray-300 hover:text-amber-400 font-medium transition-colors p-2 rounded-md">Blog</a></li>
+                    <li><a href="#" id="header-admin-login" class="text-gray-300 hover:text-amber-400 font-medium transition-colors p-2 rounded-md">Admin Login</a></li>
+                    <li><a href="#contact" class="text-gray-300 hover:text-amber-400 font-medium transition-colors p-2 rounded-md">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container py-8">
+        <section class="text-center py-16 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-xl mb-12">
+            <h1 class="text-5xl font-extrabold text-amber-400 mb-6 leading-tight">Your Empire's Digital Stronghold</h1>
+            <p class="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
+                Nextgenwealth.co is your all-in-one digital command center. Purchase high-impact courses,
+                unlock premium automation with Storm Pass, and generate passive income.
+            </p>
+            <a href="#courses" class="btn-primary">
+                <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/book-open.svg" alt="Explore Courses" class="icon" />
+                Explore Courses
+            </a>
+        </section>
+
+        <section id="courses" class="py-12">
+            <h2 class="section-title">High-Impact Digital Courses</h2>
+            <div id="dynamic-course-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+        </section>
+
+        <section id="storm-pass" class="card py-12 px-6 mt-12 bg-gradient-to-br from-gray-800 to-gray-900">
+            <h2 class="storm-pass-title">Unlock the Storm Pass</h2>
+            <p class="storm-pass-description">
+                Elevate your digital game with exclusive automation tools, growth engines, and business insights.
+                Choose the plan that fits your ambition.
+            </p>
+
+            <div class="flex justify-center items-center mb-8 gap-4">
+                <span class="text-lg font-semibold text-gray-300">Pricing in:</span>
+                <button id="toggle-currency-inr" class="btn-secondary px-4 py-2 text-sm">₹ INR</button>
+                <button id="toggle-currency-usd" class="btn-secondary px-4 py-2 text-sm">USD $</button>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-8">
+                <div class="storm-pass-option">
+                    <h3 class="storm-pass-price-display" data-inr="₹599" data-usd="$9.99">₹599</h3>
+                    <p class="storm-pass-duration">Monthly</p>
+                    <ul class="storm-pass-features">
+                        <li>Access to Instagram DM Bot (AI ideas)</li>
+                        <li>Growth Engine Insights</li>
+                        <li>Exclusive Dashboards (Simulated)</li>
+                        <li>Priority Support</li>
+                        <li>Access to Premium Course Library</li>
+                    </ul>
+                    <button class="btn-primary w-full" data-type="stormpass" data-inr-price="599" data-usd-price="9.99" data-name="Storm Pass (Monthly)">Get Started</button>
+                </div>
+                <div class="storm-pass-option">
+                    <h3 class="storm-pass-price-display" data-inr="₹2,999" data-usd="$44.99">₹2,999</h3>
+                    <p class="storm-pass-duration">Yearly</p>
+                    <ul class="storm-pass-features">
+                        <li>All Monthly Features</li>
+                        <li>Significant Savings</li>
+                        <li>Lifetime Admin Panel Access (Simulated)</li>
+                        <li>1-on-1 Strategy Session</li>
+                        <li>Future Feature Updates</li>
+                    </ul>
+                    <button class="btn-primary w-full" data-type="stormpass" data-inr-price="2999" data-usd-price="44.99" data-name="Storm Pass (Yearly)">Go Yearly & Save</button>
+                </div>
+            </div>
+
+            <div class="card bg-gray-700 p-6 mt-8">
+                <p class="text-gray-300 mb-4 text-center">Already a Storm Pass member? Enter your email to access exclusive features:</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <input type="email" id="storm-pass-email" class="gemini-input flex-grow max-w-md" placeholder="your@email.com" />
+                    <button id="check-storm-pass-access" class="btn-secondary">Check Access</button>
+                </div>
+                <p id="storm-pass-access-message" class="text-center mt-4 font-semibold"></p>
+
+                <div id="automation-feature" class="hidden mt-6 p-6 border border-amber-400 rounded-md bg-gray-800">
+                    <h3 class="text-xl font-semibold text-amber-400 mb-4">Your Automation Assistant (Storm Pass Exclusive)</h3>
+                    <p class="text-gray-300 mb-4">Generate ideas for powerful Instagram DM campaigns or automated replies using AI.</p>
+                    <label for="automation-prompt" class="gemini-input-label">Describe your automation need:</label>
+                    <textarea id="automation-prompt" class="gemini-input w-full" rows="4" placeholder="e.g., 'DM campaign for new followers interested in crypto' or 'Automated reply for comments on a business coaching reel.'"></textarea>
+                    <button id="generate-automation-idea" class="btn-primary">
+                        <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/sparkles.svg" alt="Generate" class="icon" />
+                        Generate Idea
+                    </button>
+                    <div class="gemini-response-area mt-4">
+                        <h4 class="gemini-response-title">Generated Automation Idea:</h4>
+                        <p id="automation-output">Your AI-generated idea will appear here...</p>
+                    </div>
+                </div>
+
+                <div id="storm-pass-course-creation" class="hidden mt-8 p-6 border border-amber-400 rounded-md bg-gray-800">
+                    <h3 class="text-xl font-semibold text-amber-400 mb-4">✨ Create & Sell Your Own Courses (Storm Pass Exclusive)</h3>
+                    <p class="text-gray-300 mb-4">Add new digital courses to the platform for others to purchase and download.</p>
+                    <div class="mb-4">
+                        <label for="sp-course-title" class="gemini-input-label">Course Title:</label>
+                        <input type="text" id="sp-course-title" class="gemini-input w-full" placeholder="e.g., My Digital Marketing Masterclass" />
+                    </div>
+                    <div class="mb-4">
+                        <label for="sp-course-description" class="gemini-input-label">Course Description:</label>
+                        <textarea id="sp-course-description" class="gemini-input w-full" rows="3" placeholder="A comprehensive guide to..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="sp-course-price" class="gemini-input-label">Course Price (INR):</label>
+                        <input type="number" id="sp-course-price" class="gemini-input w-full" placeholder="e.g., 4999" min="0" />
+                    </div>
+                    <div class="mb-4">
+                        <label for="sp-course-type" class="gemini-input-label">Course Type:</label>
+                        <select id="sp-course-type" class="gemini-input w-full">
+                            <option value="pdf">PDF</option>
+                            <option value="video">Video</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="sp-course-file" class="gemini-input-label">Upload Course File (PDF/Video):</label>
+                        <input type="file" id="sp-course-file" class="gemini-input w-full" accept=".pdf, .mp4, .mov, .avi" />
+                        <p class="text-xs text-gray-400 mt-1">Note: File upload is simulated. Only the filename is saved.</p>
+                    </div>
+                    <button id="sp-add-course" class="btn-primary bg-green-600 hover:bg-green-700 text-white">Add My Course</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="gemini-features" class="gemini-section mt-12">
+            <h2 class="section-title">AI-Powered Tools for Digital Supremacy</h2>
+            <p class="mb-8 text-gray-300 text-center max-w-2xl mx-auto">
+                Leverage the power of AI to streamline your content creation, marketing strategies, and business insights.
+            </p>
+
+            <div class="card bg-gray-700 p-6 mb-8">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4">General AI Assistant</h3>
+                <label for="gemini-prompt" class="gemini-input-label">Ask me anything about digital marketing, Instagram growth, or business strategy:</label>
+                <textarea id="gemini-prompt" class="gemini-input" rows="5" placeholder="e.g., 'How to grow my Instagram organically in 2024?' or 'Give me 5 ideas for a new online course.'"></textarea>
+                <button id="gemini-submit" class="btn-primary">
+                    <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/send.svg" alt="Send" class="icon" />
+                    Get AI Response
+                </button>
+                <div class="gemini-response-area mt-4">
+                    <h4 class="gemini-response-title">AI Response:</h4>
+                    <p id="gemini-output">Your AI-generated response will appear here...</p>
+                </div>
+            </div>
+
+            <div class="card bg-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4">Social Media Caption Generator</h3>
+                <p class="text-gray-300 mb-4">Craft engaging captions for your social media posts with AI.</p>
+                <label for="caption-prompt" class="gemini-input-label">Describe your post (product, event, topic, desired tone, keywords):</label>
+                <textarea id="caption-prompt" class="gemini-input w-full" rows="4" placeholder="e.g., 'New fitness product launch, energetic, target young adults, #fitness #newproduct'"></textarea>
+                <button id="generate-caption" class="btn-primary">
+                    <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/captions.svg" alt="Generate Caption" class="icon" />
+                    Generate Caption
+                </button>
+                <div class="gemini-response-area mt-4">
+                    <h4 class="gemini-response-title">Generated Caption:</h4>
+                    <p id="caption-output">Your AI-generated caption will appear here...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="blog" class="card py-12 px-6 mt-12 bg-gradient-to-br from-gray-800 to-gray-900">
+            <h2 class="section-title">Insights & Strategies (Blog)</h2>
+            <p class="text-gray-300 mb-8 text-center max-w-2xl mx-auto">
+                Dive into our expert articles, guides, and strategies for digital marketing, automation, and wealth creation.
+                These pages are optimized for Google AdSense to help you generate passive income.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card bg-gray-700 p-6">
+                    <h3 class="text-xl font-semibold text-amber-400 mb-3">Mastering Instagram Reels</h3>
+                    <p class="text-gray-400 text-sm mb-4">Published: May 20, 2025</p>
+                    <p class="text-gray-300 mb-4">Learn the secrets to creating viral Instagram Reels that drive engagement and growth. Our comprehensive guide covers everything from content ideas to editing tips.</p>
+                    <a href="#" class="btn-secondary text-sm">Read More</a>
+                </div>
+                <div class="card bg-gray-700 p-6">
+                    <h3 class="text-xl font-semibold text-amber-400 mb-3">The Future of AI in Marketing</h3>
+                    <p class="text-gray-400 text-sm mb-4">Published: May 15, 2025</p>
+                    <p class="text-gray-300 mb-4">Explore how artificial intelligence is revolutionizing digital marketing and how you can leverage AI tools for better campaigns and insights.</p>
+                    <a href="#" class="btn-secondary text-sm">Read More</a>
+                </div>
+                <div class="card bg-gray-700 p-6">
+                    <h3 class="text-xl font-semibold text-amber-400 mb-3">Building a Passive Income Stream</h3>
+                    <p class="text-gray-400 text-sm mb-4">Published: May 10, 2025</p>
+                    <p class="text-gray-300 mb-4">Discover proven strategies to build multiple passive income streams online, from affiliate marketing to digital product sales.</p>
+                    <a href="#" class="btn-secondary text-sm">Read More</a>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <a href="#" class="text-amber-400 hover:text-amber-500 font-medium transition-colors text-lg">View All Articles</a>
+            </div>
+        </section>
+
+        <section id="contact" class="card py-12 px-6 mt-12 bg-gradient-to-br from-gray-800 to-gray-900">
+            <h2 class="section-title">Get in Touch</h2>
+            <p class="text-gray-300 mb-8 text-center max-w-xl mx-auto">
+                Have questions or need support? Reach out to our team. We're here to help you succeed.
+            </p>
+            <div class="max-w-md mx-auto">
+                <form class="space-y-6">
+                    <div>
+                        <label for="contact-name" class="gemini-input-label">Your Name:</label>
+                        <input type="text" id="contact-name" class="gemini-input" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label for="contact-email" class="gemini-input-label">Your Email:</label>
+                        <input type="email" id="contact-email" class="gemini-input" placeholder="john.doe@example.com">
+                    </div>
+                    <div>
+                        <label for="contact-message" class="gemini-input-label">Your Message:</label>
+                        <textarea id="contact-message" class="gemini-input" rows="5" placeholder="Tell us how we can help..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary w-full">Send Message</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="admin-panel" class="gemini-section hidden mt-12">
+            <h2 class="section-title">Admin Panel</h2>
+            <p class="mb-4 text-red-400 font-bold text-center">
+                WARNING: This admin panel is client-side only and HIGHLY INSECURE.
+                Do NOT use this for a real production website. A real admin panel requires a secure backend with proper authentication and a database.
+            </p>
+
+            <div class="card bg-gray-700 p-6 mb-8">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4">Sales & Revenue (Simulated)</h3>
+                <p class="text-lg mb-2">Total Courses Sold: <span id="admin-total-sales" class="font-bold text-green-400">0</span></p>
+                <p class="text-lg">Total Revenue: <span id="admin-total-revenue" class="font-bold text-green-400">₹0</span></p>
+            </div>
+
+            <div class="card bg-gray-700 p-6 mb-8">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4">Add New Course</h3>
+                <div class="mb-4">
+                    <label for="admin-course-title" class="gemini-input-label">Course Title:</label>
+                    <input type="text" id="admin-course-title" class="gemini-input w-full" placeholder="e.g., Advanced Instagram Growth" />
+                </div>
+                <div class="mb-4">
+                    <label for="admin-course-description" class="gemini-input-label">Course Description:</label>
+                    <textarea id="admin-course-description" class="gemini-input w-full" rows="3" placeholder="A detailed description of the course..."></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="admin-course-price" class="gemini-input-label">Course Price (INR):</label>
+                    <input type="number" id="admin-course-price" class="gemini-input w-full" placeholder="e.g., 9999" min="0" />
+                </div>
+                <div class="mb-4">
+                    <label for="admin-course-type" class="gemini-input-label">Course Type:</label>
+                    <select id="admin-course-type" class="gemini-input w-full">
+                        <option value="pdf">PDF</option>
+                        <option value="video">Video</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="admin-course-file" class="gemini-input-label">Upload Course File (PDF/Video):</label>
+                    <input type="file" id="admin-course-file" class="gemini-input w-full" accept=".pdf, .mp4, .mov, .avi" />
+                    <p class="text-xs text-gray-400 mt-1">Note: File upload is simulated. Only the filename is saved.</p>
+                </div>
+                <button id="admin-add-course" class="btn-primary btn-success w-full">Add Course</button>
+            </div>
+
+            <div class="card bg-gray-700 p-6">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4">Manage Courses</h3>
+                <ul id="admin-course-list" class="list-disc pl-5">
+                    </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 py-8 mt-12 shadow-inner">
+        <div class="container text-center text-gray-400">
+            <p class="text-lg font-semibold text-amber-400 mb-2">Nextgenwealth.co</p>
+            <p class="text-sm">&copy; 2025 Nextgenwealth.co. All rights reserved.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="#" class="text-gray-400 hover:text-amber-400 transition-colors text-sm">Privacy Policy</a>
+                <span class="text-gray-600">|</span>
+                <a href="#" class="text-gray-400 hover:text-amber-400 transition-colors text-sm">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <div id="payment-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div id="payment-input-section">
+                <h3 id="payment-modal-title">Complete Your Purchase</h3>
+                <p id="payment-modal-item-name" class="text-lg font-semibold"></p>
+                <p class="text-3xl font-bold text-amber-400 mb-4" id="payment-modal-price"></p>
+                <p class="text-gray-400 mb-4">Enter simulated card details below:</p>
+                <div id="card-element" class="mb-4">
+                    </div>
+                <div id="card-errors" role="alert"></div>
+
+                <div class="modal-buttons">
+                    <button id="payment-confirm-button" class="modal-button confirm">Confirm Payment</button>
+                    <button id="payment-cancel-button" class="modal-button cancel">Cancel</button>
+                </div>
+            </div>
+
+            <div id="payment-download-section" class="download-section hidden">
+                <h3 class="text-xl font-semibold text-amber-400 mb-4">Payment Successful!</h3>
+                <p class="text-gray-300 mb-4">Thank you for your purchase of <span id="download-item-name" class="font-semibold text-amber-400"></span>!</p>
+                <a id="item-download-link" href="#" download class="download-link">
+                    <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/download.svg" alt="Download" class="icon" />
+                    Download Your File
+                </a>
+                <button id="close-download-modal" class="btn-secondary mt-4">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        // This email grants simulated Storm Pass and Admin Panel access
+        const FREE_ACCESS_EMAIL = "manabsutradhar882@gmail.com";
+        // This is a client-side secret key for the admin panel - HIGHLY INSECURE for production!
+        const ADMIN_SECRET_KEY = "nextgenadmin";
+
+        // Placeholder URLs for simulated content downloads
+        const PLACEHOLDER_PDF_URL = "https://www.africau.edu/images/default/sample.pdf"; // A small, publicly available PDF
+        const PLACEHOLDER_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4"; // A small, publicly available MP4 video
+
+        // Initialize Stripe.js with a dummy Publishable Key for client-side UI only.
+        // In a real application, replace 'pk_test_YOUR_PUBLISHABLE_KEY' with your actual Stripe Publishable Key.
+        // This key is for client-side integration and does not process real payments here.
+        const stripe = Stripe('pk_test_51P70b0H42o5tL8zN4b9XzNlQ2eS8lK3h7yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8yZ8y
